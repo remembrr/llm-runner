@@ -17,7 +17,7 @@ jobs:
     env:
       # Pin llama.cpp to the commit this wrapper's API is written against
       # (llama.cpp v1.0.0 / build 12359). Bump this when you adopt a newer API.
-      LLAMA_REF: b1b770d90
+      LLAMA_REF: b1b770d90d94cad9e9ea5b993bdbc383a522fb28
       LLAMA_INSTALL: ${{ github.workspace }}/.llama-install
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
