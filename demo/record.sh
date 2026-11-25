@@ -1,10 +1,11 @@
 #!/bin/sh
 # Drives the README demo. Shows clean commands while running the real binary.
-# Regenerate the GIF with:
-#   asciinema rec -i 2 --overwrite -c "sh demo/record.sh /path/to/model.gguf" demo/demo.cast
+# Takes the model path as $1 — use the PINNED model so the GIF is reproducible:
+#   MODEL=$(sh demo/fetch-model.sh)
+#   asciinema rec --overwrite -c "sh demo/record.sh $MODEL" demo/demo.cast
 #   agg demo/demo.cast demo/demo.gif
 set -e
-MODEL="${1:?usage: record.sh <model.gguf>}"
+MODEL="${1:?usage: record.sh <model.gguf>  (get the pinned path from demo/fetch-model.sh)}"
 PATH="$(cd "$(dirname "$0")/.." && pwd)/build:$PATH"   # so argv[0] is just "llm-runner"
 P='\033[1;32m$\033[0m'   # green prompt
 
