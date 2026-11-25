@@ -6,12 +6,14 @@
 **The model is pinned and SHA-verified** so the demo reproduces the same *content*:
 `Qwen/Qwen2.5-0.5B-Instruct-GGUF`, quant `Q4_K_M`, SHA-256 `74a4da8c…`.
 `fetch-model.sh` downloads it via llama.cpp if it isn't cached and verifies the hash
-(failing loudly if upstream ever changes the file). The demo runs greedy (`-t 0`), so
-the pinned weights produce the **same model output** every time.
+(failing loudly if upstream ever changes the file). The demo runs greedy (`-t 0`), so it **reproduces the validated demo content
+in the documented environment**. Greedy decoding is deterministic given identical
+logits, but a different llama.cpp build or hardware backend (Metal / CPU / CUDA) can
+still shift the output — so the same answer is not guaranteed across environments.
 
-The exact GIF *bytes* are not pinned — they also depend on the `asciinema`/`agg`
-versions and the recording/render environment. What's reproducible is the setup: the
-same commands, the same verified model, and the same answer.
+The exact GIF *bytes* are not pinned either — they also depend on the `asciinema`/`agg`
+versions and the recording/render environment. What's pinned is the setup: the same
+commands and the same SHA-verified model.
 
 ## Regenerate
 
