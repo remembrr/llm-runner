@@ -2,6 +2,8 @@
 
 [![build](https://github.com/remembrr/llm-runner/actions/workflows/build.yml/badge.svg)](https://github.com/remembrr/llm-runner/actions/workflows/build.yml)
 
+![llm-runner demo: the help output, then a chat completion](demo/demo.gif)
+
 A minimal C++ wrapper around **libllama** (llama.cpp). It links the installed
 llama.cpp library, loads a GGUF model, and streams a completion from a prompt.
 
