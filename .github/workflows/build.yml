@@ -1,0 +1,69 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    env:
+      # Pin llama.cpp to the commit this wrapper's API is written against
+      # (llama.cpp v1.0.0 / build 12359). Bump this when you adopt a newer API.
+      LLAMA_REF: b1b770d90
+      LLAMA_INSTALL: ${{ github.workspace }}/.llama-install
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools (Ubuntu)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y cmake build-essential git
+
+      - name: Cache llama.cpp (${{ matrix.os }} @ ${{ env.LLAMA_REF }})
+        id: cache-llama
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.LLAMA_INSTALL }}
+          key: llama-${{ matrix.os }}-${{ env.LLAMA_REF }}
+
+      # Build only the shared library (no examples/server/tests/curl) — fast and
+      # dependency-light. Installs llama.h + ggml.h and libllama/libggml into a prefix.
+      - name: Build & install libllama (pinned)
+        if: steps.cache-llama.outputs.cache-hit != 'true'
+        run: |
+          set -eux
+          git clone https://github.com/ggml-org/llama.cpp.git
+          git -C llama.cpp checkout "$LLAMA_REF"
+          cmake -S llama.cpp -B llama.cpp/build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=ON \
+            -DLLAMA_CURL=OFF \
+            -DGGML_METAL=OFF \
+            -DLLAMA_BUILD_TESTS=OFF \
+            -DLLAMA_BUILD_EXAMPLES=OFF \
+            -DLLAMA_BUILD_TOOLS=OFF \
+            -DLLAMA_BUILD_SERVER=OFF
+          cmake --build llama.cpp/build -j
+          cmake --install llama.cpp/build --prefix "$LLAMA_INSTALL"
+
+      - name: Configure
+        run: >
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
+          -DLLAMA_PREFIX="$LLAMA_INSTALL" -DGGML_PREFIX="$LLAMA_INSTALL"
+
+      - name: Build
+        run: cmake --build build -j
+
+      # Verifies the binary links and the shared libs load at runtime.
+      - name: Smoke test
+        run: ./build/llm-runner -h
+        env:
+          LD_LIBRARY_PATH: ${{ env.LLAMA_INSTALL }}/lib
+          DYLD_LIBRARY_PATH: ${{ env.LLAMA_INSTALL }}/lib
