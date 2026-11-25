@@ -3,10 +3,15 @@
 `demo.gif` in the top-level README is a recording of the real `llm-runner` binary —
 `llm-runner -h`, then a chat completion.
 
-**The model is pinned** so the GIF is reproducible: `Qwen/Qwen2.5-0.5B-Instruct-GGUF`,
-quant `Q4_K_M`, SHA-256 `74a4da8c…`. `fetch-model.sh` downloads it via llama.cpp if
-it isn't cached and verifies the hash (failing loudly if upstream ever changes the
-file). The demo runs greedy (`-t 0`), so identical weights give identical output.
+**The model is pinned and SHA-verified** so the demo reproduces the same *content*:
+`Qwen/Qwen2.5-0.5B-Instruct-GGUF`, quant `Q4_K_M`, SHA-256 `74a4da8c…`.
+`fetch-model.sh` downloads it via llama.cpp if it isn't cached and verifies the hash
+(failing loudly if upstream ever changes the file). The demo runs greedy (`-t 0`), so
+the pinned weights produce the **same model output** every time.
+
+The exact GIF *bytes* are not pinned — they also depend on the `asciinema`/`agg`
+versions and the recording/render environment. What's reproducible is the setup: the
+same commands, the same verified model, and the same answer.
 
 ## Regenerate
 
