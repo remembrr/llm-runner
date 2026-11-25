@@ -31,10 +31,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.LLAMA_INSTALL }}
-          key: llama-${{ matrix.os }}-${{ env.LLAMA_REF }}
+          key: llama-${{ matrix.os }}-${{ env.LLAMA_REF }}-v2
 
-      # Build only the shared library (no examples/server/tests/curl) — fast and
-      # dependency-light. Installs llama.h + ggml.h and libllama/libggml into a prefix.
+      # Canonical shared-library build (curl + Metal off for CI). We don't disable
+      # common/examples piecemeal: the always-built `app/` target depends on common
+      # (arg.h, build-info.h), so a partial config fails to compile. Installs
+      # llama.h + ggml.h and libllama/libggml into a prefix.
       - name: Build & install libllama (pinned)
         if: steps.cache-llama.outputs.cache-hit != 'true'
         run: |
@@ -45,11 +47,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_SHARED_LIBS=ON \
             -DLLAMA_CURL=OFF \
-            -DGGML_METAL=OFF \
-            -DLLAMA_BUILD_TESTS=OFF \
-            -DLLAMA_BUILD_EXAMPLES=OFF \
-            -DLLAMA_BUILD_TOOLS=OFF \
-            -DLLAMA_BUILD_SERVER=OFF
+            -DGGML_METAL=OFF
           cmake --build llama.cpp/build -j
           cmake --install llama.cpp/build --prefix "$LLAMA_INSTALL"
 
